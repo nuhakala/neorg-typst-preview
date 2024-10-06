@@ -4,8 +4,8 @@ local H = require("nvim-typst-preview.utils")
 -- Default config
 plugin.config = {
 	default_keymap = true,
-    dir = nil, -- remember to add '/' at the end of the path
-    file_name = "preview.typ",
+	dir = nil, -- remember to add '/' at the end of the path
+	file_name = "preview.typ",
 }
 H.set_default_config(plugin.config)
 
@@ -14,47 +14,42 @@ local python_dir = nil
 local python_script = "neorg.py"
 local debounce = true
 local toggle = true
+local typstwatch_augroup = vim.api.nvim_create_augroup("typstwatch", { clear = true })
 -- local watchjob = nil
 
 plugin.setup = function(cfg)
 	local config = H.setup_config(cfg)
 	plugin.config = config
 
-    python_dir = H.get_plugin_root() .. "python/"
+	python_dir = H.get_plugin_root() .. "python/"
 
-    if plugin.config.dir == nil then
-        plugin.config.dir = H.get_plugin_root()
-    else
-        local path = require("plenary.path").new(plugin.config.dir)
-        plugin.config.dir = path:expand()
-    end
+	if plugin.config.dir == nil then
+		plugin.config.dir = H.get_plugin_root()
+	else
+		local path = require("plenary.path").new(plugin.config.dir)
+		plugin.config.dir = path:expand()
+	end
 
 	-- Do some initial stuff
 	if config.default_keymap then
-        -- Automatically compile file into typst file
-        vim.keymap.set("n", "<leader>op", plugin.toggle, { desc = "Start generating typst file" })
+		-- Automatically compile file into typst file
+		vim.keymap.set("n", "<leader>op", plugin.toggle, { desc = "Start generating typst file" })
 	end
 end
 
 plugin.watch = function()
-    vim.api.nvim_create_autocmd({"BufModifiedSet", "BufReadPost"}, {
-        group = typstwatch,
-        pattern = '*.norg',
-        callback = function() 
-            if debounce then
-                debounce = false
-                vim.defer_fn(function ()
-                    H.transform(plugin.config, python_script, python_dir)
-                    debounce = true
-                end, 200)
-            end
-        end,
-    })
-    vim.notify("Watching open buffer", "info", { title = "Typst preview" })
+	vim.api.nvim_create_autocmd({ "InsertLeave", "BufEnter" }, {
+		group = typstwatch,
+		pattern = "*.norg",
+		callback = function()
+			H.transform(plugin.config, python_script, python_dir)
+		end,
+	})
+	vim.notify("Watching open buffer", "info", { title = "Typst preview" })
 
-    -- Compiling is not so nice, because typst compiler does no print anything
-    -- to stdout or stderror, so catching compiler errors is impossible. It is
-    -- nicer to work on file when I see the compiler results and know what is wrong.
+	-- Compiling is not so nice, because typst compiler does no print anything
+	-- to stdout or stderror, so catching compiler errors is impossible. It is
+	-- nicer to work on file when I see the compiler results and know what is wrong.
 
 	-- watchjob = Job:new({
 	-- 	command = "typst",
@@ -62,28 +57,27 @@ plugin.watch = function()
 	-- 	detached = true,
 	-- 	cwd = "/home/jaba/OmatProjektit/nvim-typst-preview/python/",
 	-- }):start()
+
+	toggle = false
 end
 
 plugin.stop_watch = function()
-    vim.api.nvim_clear_autocmds({group = "typstwatch"})
-    vim.notify("Stopped watching open buffer", "info", { title = "Typst preview" })
-    -- if watchjob ~= nil then
-    --     watchjob.shutdown()
-    -- end
+	vim.api.nvim_clear_autocmds({ group = "typstwatch" })
+	vim.notify("Stopped watching open buffer", "info", { title = "Typst preview" })
+	toggle = true
 end
 
 plugin.run = function()
-    H.transform(plugin.config, python_script, source_file)
+	H.transform(plugin.config, python_script, source_file)
 	H.compile(plugin.config)
 end
 
 plugin.toggle = function()
-    if toggle then
-        plugin.watch()
-    else
-        plugin.stop_watch()
-    end
+	if toggle then
+		plugin.watch()
+	else
+		plugin.stop_watch()
+	end
 end
-
 
 return plugin

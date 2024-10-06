@@ -2,22 +2,20 @@ local H = {}
 local Job = require("plenary.job")
 
 H.get_plugin_root = function()
-    local this_path = debug.getinfo(2, "S").source:sub(2)
-    local path = require("plenary.path").new(this_path)
-    local parents = path:parents()
-    return parents[3] .. "/"
+	local this_path = debug.getinfo(2, "S").source:sub(2)
+	local path = require("plenary.path").new(this_path)
+	local parents = path:parents()
+	return parents[3] .. "/"
 end
 
 H.transform = function(cfg, python_script, python_dir)
-    local source_file = vim.fn.expand("%:p")
-    vim.print(python_script)
-    vim.print(source_file)
-    Job:new({
-        command = "python3",
-        args = { python_script, source_file, cfg.dir .. cfg.file_name },
-        cwd = python_dir,
-        enable_recording = true,
-    }):start()
+	local source_file = vim.fn.expand("%:p")
+	Job:new({
+		command = "python3",
+		args = { python_script, source_file, cfg.dir .. cfg.file_name },
+		cwd = python_dir,
+		enable_recording = true,
+	}):start()
 end
 
 H.compile = function(cfg)
@@ -25,16 +23,16 @@ H.compile = function(cfg)
 		command = "typst",
 		args = { "compile", "--open=xdg-open", cfg.file_name },
 		cwd = H.get_plugin_root(),
-        enable_recording = true,
-        enable_handlers = true,
+		enable_recording = true,
+		enable_handlers = true,
 		on_stdout = function(error, data)
 			vim.print(data)
 		end,
 	}):start()
 end
 
-H.set_default_config = function (cfg)
-    H.default_config = vim.deepcopy(cfg)
+H.set_default_config = function(cfg)
+	H.default_config = vim.deepcopy(cfg)
 end
 
 ---Combine default and user-provided configs
