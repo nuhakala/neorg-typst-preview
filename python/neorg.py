@@ -2,6 +2,7 @@ import re
 import sys
 from datetime import datetime
 
+# Default header stuff that import algorithm environment and set styling.
 headers = """#import "@preview/algo:0.3.3": algo, i, d, comment, code; #import "@preview/tablex:0.0.8": tablex; #import "@preview/tablem:0.1.0": tablem;
 #show link: underline
 #set page(background: rect(width: 200%, height: 200%, fill: rgb("#1d1c1b")))
@@ -65,6 +66,7 @@ filetext = re.sub(r"@document.meta(.*?)@end", "", filetext, re.DOTALL, re.S)
 
 # Typst environments
 filetext = re.sub(r"@typst(.*?)@end", "\\g<1>", filetext, re.DOTALL, re.S)
+# My custom block for highlighting, though prefer using definition nowadays
 filetext = re.sub(r"@tblock(.*?)@end", "#highlight_block[\\g<1>]", filetext, re.DOTALL, re.S)
 
 # Definition

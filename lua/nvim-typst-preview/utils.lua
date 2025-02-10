@@ -19,9 +19,16 @@ H.transform = function(cfg, python_script, python_dir)
 end
 
 H.compile = function(cfg)
+	args = {}
+	if cfg.open_on_run then
+		args = { "compile", "--open=xdg-open", cfg.dir .. cfg.file_name }
+	else
+		args = { "compile", cfg.dir .. cfg.file_name }
+	end
+
 	Job:new({
 		command = "typst",
-		args = { "compile", "--open=xdg-open", cfg.file_name },
+		args = args,
 		cwd = H.get_plugin_root(),
 		enable_recording = true,
 		enable_handlers = true,
@@ -47,7 +54,8 @@ H.setup_config = function(config)
 		default_keymap = { config.default_keymap, "boolean" },
 		dir = { config.dir, "string" },
 		file_name = { config.file_name, "string" },
-		-- mode_events = { config.mode_events, "table" },
+		open_on_run = { config.open_on_run, "boolean" },
+		watch_events = { config.watch_events, "table" },
 	})
 
 	return config

@@ -6,6 +6,8 @@ plugin.config = {
 	default_keymap = true,
 	dir = nil, -- remember to add '/' at the end of the path
 	file_name = "preview.typ",
+	open_on_run = false,
+    watch_events = { "InsertLeave", "BufEnter" },
 }
 H.set_default_config(plugin.config)
 
@@ -38,7 +40,7 @@ plugin.setup = function(cfg)
 end
 
 plugin.watch = function()
-	vim.api.nvim_create_autocmd({ "InsertLeave", "BufEnter" }, {
+	vim.api.nvim_create_autocmd(plugin.config.watch_events, {
 		group = typstwatch,
 		pattern = "*.norg",
 		callback = function()
@@ -68,7 +70,7 @@ plugin.stop_watch = function()
 end
 
 plugin.run = function()
-	H.transform(plugin.config, python_script, source_file)
+	H.transform(plugin.config, python_script, python_dir)
 	H.compile(plugin.config)
 end
 
