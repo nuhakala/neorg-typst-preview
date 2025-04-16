@@ -1,5 +1,6 @@
 local H = {}
 local Job = require("plenary.job")
+local tr = require("neorg-typst-preview.transform")
 
 H.get_plugin_root = function()
 	local this_path = debug.getinfo(2, "S").source:sub(2)
@@ -19,7 +20,7 @@ H.transform = function(cfg, python_script, python_dir)
 end
 
 H.compile = function(cfg)
-	args = {}
+	local args = {}
 	if cfg.open_on_run then
 		args = { "compile", "--open=xdg-open", cfg.dir .. cfg.file_name }
 	else

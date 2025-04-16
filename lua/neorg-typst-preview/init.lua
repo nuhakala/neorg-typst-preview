@@ -1,5 +1,7 @@
 local plugin = {}
-local H = require("nvim-typst-preview.utils")
+local H = require("neorg-typst-preview.utils")
+local tr = require("neorg-typst-preview.transform")
+local st = require("neorg-typst-preview.string-utils")
 
 -- Default config
 plugin.config = {
@@ -7,7 +9,7 @@ plugin.config = {
 	dir = nil, -- remember to add '/' at the end of the path
 	file_name = "preview.typ",
 	open_on_run = false,
-    watch_events = { "InsertLeave", "BufEnter" },
+	watch_events = { "InsertLeave", "BufEnter" },
 }
 H.set_default_config(plugin.config)
 
@@ -80,6 +82,48 @@ plugin.toggle = function()
 	else
 		plugin.stop_watch()
 	end
+end
+
+-- TODO: linkkien korjaus, ota huomioon myös linkit mitkä
+-- viittaa headeriin tai internettiin
+plugin.testi = function()
+	local prev = plugin.config.dir .. plugin.config.file_name
+	local file = io.open(prev, "w")
+	if file == nil then
+		vim.notify("Could not open preview file")
+		return
+	end
+
+	local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+	local cases = tr.get_cases()
+
+	local index = 1
+	while index < #lines do
+		-- local line = st.trim_string(lines[index])
+		local line = lines[index]
+		if st.startswith(line, "-") then
+			line = tr.list(line)
+		end
+		if st.startswith(line, "* ") or st.startswith(line, "**") then
+			line = tr.header(line)
+		end
+		for pattern, func in pairs(cases) do
+			if st.startswith(line, pattern) then
+				index = func(index, lines, file, #lines)
+				goto continue
+			end
+		end
+		if string.find(line, "{:(.*):(.*)}") then
+			index = tr.parse_link(index, lines, file)
+		else
+			file:write(line .. "\n")
+		end
+
+		::continue::
+		index = index + 1
+	end
+
+	file:close()
 end
 
 return plugin

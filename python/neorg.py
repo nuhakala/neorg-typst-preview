@@ -3,7 +3,7 @@ import sys
 from datetime import datetime
 
 # Default header stuff that import algorithm environment and set styling.
-headers = """#import "@preview/algo:0.3.3": algo, i, d, comment, code; #import "@preview/tablex:0.0.8": tablex; #import "@preview/tablem:0.1.0": tablem;
+headers = """#import "@preview/algo:0.3.6": algo, i, d, comment, code; #import "@preview/tablex:0.0.8": tablex; #import "@preview/tablem:0.1.0": tablem;
 #show link: underline
 #set page(background: rect(width: 200%, height: 200%, fill: rgb("#1d1c1b")))
 #set text(fill: rgb("#AAAAAA"))
